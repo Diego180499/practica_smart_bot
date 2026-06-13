@@ -255,12 +255,12 @@ def seed(db: Session) -> None:
     configuraciones = [
         {
             "clave": "TELEGRAM_BOT_TOKEN",
-            "valor": "",
+            "valor": os.getenv("TELEGRAM_BOT_TOKEN", ""),
             "descripcion": "Token del bot de Telegram (obtenido desde @BotFather)",
         },
         {
             "clave": "TELEGRAM_CHAT_ID",
-            "valor": "",
+            "valor": os.getenv("TELEGRAM_CHAT_ID", ""),
             "descripcion": "ID del grupo o chat de Telegram donde el bot responde",
         },
         {

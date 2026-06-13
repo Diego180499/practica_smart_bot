@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  # ─── Base de datos ───────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: smartbot_db
+    restart: unless-stopped
+    env_file:
+      - ./smartbot-backend/.env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$DB_USER -p$$DB_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ─── Backend (FastAPI) ───────────────────────────────────────
+  backend:
+    build:
+      context: ./smartbot-backend
+      dockerfile: Dockerfile
+    container_name: smartbot_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./smartbot-backend/.env
+    environment:
+      DB_HOST: db
+    volumes:
+      - ./smartbot-backend:/app
+
+  # ─── Frontend (nginx + HTML estático) ────────────────────────
+  frontend:
+    build:
+      context: ./smartbot-frontend
+      dockerfile: Dockerfile
+    container_name: smartbot_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mysql_data:

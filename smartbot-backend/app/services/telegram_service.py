@@ -198,3 +198,38 @@ def eliminar_webhook(token: Optional[str] = None) -> Dict[str, Any]:
         raise RuntimeError(f"Telegram deleteWebhook falló: {descripcion}")
 
     return datos
+
+
+def obtener_updates(offset: Optional[int] = None, timeout: int = 30, token: Optional[str] = None) -> list:
+    """Obtiene actualizaciones pendientes usando long polling (getUpdates).
+
+    Args:
+        offset:  ID del último update procesado + 1. Telegram descarta
+                 los updates anteriores a este valor.
+        timeout: Segundos que Telegram espera antes de responder con lista
+                 vacía (long polling). 0 = short polling.
+        token:   Token del bot. Si se omite, usa TELEGRAM_BOT_TOKEN del env.
+
+    Returns:
+        Lista de objetos Update de Telegram.
+
+    Raises:
+        RuntimeError: Si Telegram responde con ok=false.
+        httpx.RequestError: Si hay problemas de red.
+    """
+    tok = _resolver_token(token)
+    params: Dict[str, Any] = {"timeout": timeout}
+    if offset is not None:
+        params["offset"] = offset
+
+    url = _url("getUpdates", tok)
+    # El timeout de httpx debe ser mayor que el timeout de Telegram
+    with httpx.Client(timeout=timeout + 5) as client:
+        respuesta = client.get(url, params=params)
+
+    datos = respuesta.json()
+    if not datos.get("ok"):
+        descripcion = datos.get("description", "Error desconocido")
+        raise RuntimeError(f"Telegram getUpdates falló: {descripcion}")
+
+    return datos.get("result", [])
