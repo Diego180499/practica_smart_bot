@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartBot Admin — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__brand">Smart<span>Bot</span> Admin</div>
+      <nav class="sidebar__nav">
+        <a href="#estadisticas" data-section="estadisticas" class="active">📊 Dashboard</a>
+        <a href="#categorias" data-section="categorias">🗂 Categorías</a>
+        <a href="#preguntas" data-section="preguntas">❓ Preguntas</a>
+        <a href="#configuracion" data-section="configuracion">⚙️ Configuración Bot</a>
+        <a href="#bot" data-section="bot">🤖 Gestión Bot</a>
+        <a href="#logs" data-section="logs">📋 Logs</a>
+      </nav>
+      <div class="sidebar__footer">
+        <button class="btn btn--ghost" id="btn-logout" style="width:100%">Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Menú">☰</button>
+        <h1 id="section-title">Dashboard</h1>
+      </header>
+
+      <div class="content-area">
+        <!-- Estadísticas -->
+        <section id="section-estadisticas" class="section">
+          <div class="section-header">
+            <h2>Resumen de uso</h2>
+            <button class="btn btn--ghost btn--sm" id="btn-refresh-stats">↻ Actualizar</button>
+          </div>
+          <div class="kpi-grid" id="kpi-grid"></div>
+          <div class="grid-2">
+            <div class="section-block">
+              <h3 class="section-block__title">Top Preguntas</h3>
+              <div class="table-wrapper" id="table-top-preguntas"></div>
+            </div>
+            <div class="section-block">
+              <h3 class="section-block__title">Top Usuarios</h3>
+              <div class="table-wrapper" id="table-top-usuarios"></div>
+            </div>
+          </div>
+          <div class="section-block">
+            <h3 class="section-block__title">Distribución por Categoría</h3>
+            <div class="table-wrapper" id="table-distribucion"></div>
+          </div>
+        </section>
+
+        <!-- Categorías -->
+        <section id="section-categorias" class="section hidden">
+          <div class="section-header">
+            <h2>Categorías</h2>
+            <button class="btn btn--primary btn--sm" id="btn-nueva-categoria">+ Nueva Categoría</button>
+          </div>
+          <div class="table-wrapper" id="table-categorias"></div>
+        </section>
+
+        <!-- Preguntas -->
+        <section id="section-preguntas" class="section hidden">
+          <div class="section-header">
+            <h2>Preguntas Frecuentes</h2>
+            <button class="btn btn--primary btn--sm" id="btn-nueva-pregunta">+ Nueva Pregunta</button>
+          </div>
+          <div class="filters-bar">
+            <div class="form-group">
+              <label for="filtro-categoria">Filtrar por categoría</label>
+              <select id="filtro-categoria" class="form-control">
+                <option value="">Todas las categorías</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="filtro-busqueda">Búsqueda rápida</label>
+              <input type="text" id="filtro-busqueda" class="form-control" placeholder="Buscar en la tabla...">
+            </div>
+          </div>
+          <div class="table-wrapper" id="table-preguntas"></div>
+          <div class="pagination" id="pagination-preguntas">
+            <span id="pagination-preguntas-info"></span>
+            <div class="pagination__controls">
+              <button class="btn btn--ghost btn--sm" id="btn-preg-anterior" disabled>Anterior</button>
+              <button class="btn btn--ghost btn--sm" id="btn-preg-siguiente" disabled>Siguiente</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Configuración -->
+        <section id="section-configuracion" class="section hidden">
+          <div class="section-header">
+            <h2>Configuración del Bot</h2>
+          </div>
+          <div id="config-container"></div>
+        </section>
+
+        <!-- Gestión Bot -->
+        <section id="section-bot" class="section hidden">
+          <div class="section-header">
+            <h2>Gestión del Bot</h2>
+          </div>
+
+          <div class="card bot-subsection">
+            <h3>Estado del Bot</h3>
+            <p>Verifica que el token de Telegram configurado sea válido.</p>
+            <button class="btn btn--primary btn--sm" id="btn-verificar-bot" style="margin-top:12px">Verificar Token</button>
+            <div id="resultado-verificar"></div>
+          </div>
+
+          <div class="card bot-subsection">
+            <h3>Webhook</h3>
+            <div class="form-group">
+              <label for="url-webhook">URL del Webhook</label>
+              <input type="url" id="url-webhook" class="form-control"
+                     placeholder="https://mi-servidor.com/api/bot/webhook">
+            </div>
+            <div class="section-actions" style="margin-top:12px">
+              <button class="btn btn--primary btn--sm" id="btn-registrar-webhook">Registrar Webhook</button>
+              <button class="btn btn--ghost btn--sm" id="btn-info-webhook">Ver Info</button>
+              <button class="btn btn--danger btn--sm" id="btn-eliminar-webhook">Eliminar Webhook</button>
+            </div>
+            <div id="resultado-webhook" class="webhook-info"></div>
+          </div>
+
+          <div class="card bot-subsection">
+            <h3>Prueba de Consulta Directa</h3>
+            <div class="form-group">
+              <label for="mensaje-prueba">Escribe un mensaje de prueba</label>
+              <input type="text" id="mensaje-prueba" class="form-control" placeholder="Ej: horario de atención">
+            </div>
+            <button class="btn btn--primary btn--sm" id="btn-consultar">Consultar</button>
+            <div id="resultado-consulta"></div>
+          </div>
+        </section>
+
+        <!-- Logs -->
+        <section id="section-logs" class="section hidden">
+          <div class="section-header">
+            <h2>Logs de Consultas</h2>
+          </div>
+          <div class="filters-bar">
+            <div class="form-group">
+              <label for="log-desde">Desde</label>
+              <input type="datetime-local" id="log-desde" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="log-hasta">Hasta</label>
+              <input type="datetime-local" id="log-hasta" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="log-telegram-id">Telegram ID</label>
+              <input type="number" id="log-telegram-id" class="form-control" placeholder="Ej: 987654321">
+            </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="log-sin-respuesta">
+              <label for="log-sin-respuesta">Solo sin respuesta</label>
+            </div>
+            <button class="btn btn--primary btn--sm" id="btn-aplicar-filtros">Aplicar</button>
+            <button class="btn btn--secondary btn--sm" id="btn-limpiar-filtros">Limpiar</button>
+          </div>
+          <div class="table-wrapper" id="table-logs"></div>
+          <div class="pagination" id="pagination-logs">
+            <span id="pagination-logs-info"></span>
+            <div class="pagination__controls">
+              <button class="btn btn--ghost btn--sm" id="btn-log-anterior" disabled>Anterior</button>
+              <button class="btn btn--ghost btn--sm" id="btn-log-siguiente" disabled>Siguiente</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal global -->
+  <div id="modal" class="modal hidden">
+    <div class="modal__overlay"></div>
+    <div class="modal__box">
+      <header class="modal__header">
+        <h3 id="modal-title"></h3>
+        <button class="modal__close" id="modal-close" aria-label="Cerrar">&times;</button>
+      </header>
+      <div id="modal-body" class="modal__body"></div>
+      <footer class="modal__footer">
+        <button class="btn btn--secondary" id="modal-cancel">Cancelar</button>
+        <button class="btn btn--primary" id="modal-confirm">Guardar</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+  <div id="loader" class="loader hidden">
+    <div class="loader__spinner"></div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
